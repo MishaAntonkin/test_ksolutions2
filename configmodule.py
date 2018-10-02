@@ -1,4 +1,5 @@
 class Config(object):
     SECRET_KEY = 'you-will-never-guess'
-    SECRET_SHOP_KEY = '9HXuiLFDwxc2PkdZsPeUE0t4DHaIGOHfo'
-    SHOP_ID = '306273'
+    SQLALCHEMY_DATABASE_URI = 'postgresql://localhost/pre-registration'
+    SECRET_SHOP_KEY = '0TQXumpJpecZIMLavnvWTCNXG'
+    SHOP_ID = '1135'

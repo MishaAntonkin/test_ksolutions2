@@ -1,0 +1,14 @@
+{% extends "index.html" %}
+
+{% block content %}
+<h3>Do you confirm your buy?</h3>
+<form name="Pay" class="border col-sm-7 m-auto p-5" method={{ method }} action={{ action }}
+accept-charset="UTF-8">
+    {% for key, value in input_fields.items() %}
+        <input name="{{ key }}" value="{{ value }}" />
+    {% endfor %}
+    <br>
+    <input class="btn btn-primary my-2" value="Test invoice" type="submit">
+    
+</form>
+{% endblock %}
