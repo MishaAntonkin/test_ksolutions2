@@ -1,19 +1,15 @@
-import hashlib
-
 from flask import current_app, render_template, redirect
 import requests
 
-from utils import clear_data_to_payload, InvoiceCounter, create_sign
-
-
-get_invoice_id = InvoiceCounter()
+from .utils import clear_data_to_payload, InvoiceCounter, create_sign
+from .utils.db_utils import save_invoice
 
 
 def pay_method(form):
     keys_required = ('amount', 'currency', 'shop_id', 'shop_order_id')
 
-    invoice_id = get_invoice_id()
     amount, currency, description = clear_data_to_payload(form)
+    invoice_id = str(save_invoice(amount, currency, description))
 
     payload = {'description': description, 'shop_order_id': invoice_id,
                'currency': currency, 'amount': amount,
@@ -21,7 +17,6 @@ def pay_method(form):
     sign = create_sign(payload, keys_required,
                      current_app.config['SECRET_SHOP_KEY'])
     payload['sign'] = sign
-    #write_log('success', payload)
     return render_template('invoice.html', input_fields=payload, method='post',
                            action='https://pay.piastrix.com/ru/pay')
 
@@ -29,8 +24,8 @@ def pay_method(form):
 def bill_method(form):
     keys_required = ('shop_amount', 'shop_currency', 'shop_id',
                      'shop_order_id', 'payer_currency')
-    invoice_id = get_invoice_id()
     amount, currency, description = clear_data_to_payload(form)
+    invoice_id = str(save_invoice(amount, currency, description))
 
     payload = {'description': description, 'shop_order_id': invoice_id,
                'shop_currency': currency, 'payer_currency': currency,
@@ -44,19 +39,21 @@ def bill_method(form):
     if r.status_code == 200:
         response_json = r.json()
     else:
+        current_app.logger.info('not 200 response', 'bill_method')
         return redirect('/')
 
     if response_json.get('result', False):
         return redirect(response_json['data']['url'])
     else:
+        current_app.logger.info('result False or invalid json', 'bill_method')
         return redirect('/')
 
 
 def invoice_method(form):
     keys_required = ('amount', 'currency', 'payway', 'shop_id',
                      'shop_order_id')
-    invoice_id = get_invoice_id()
     amount, currency, description = clear_data_to_payload(form)
+    invoice_id = str(save_invoice(amount, currency, description))
 
     payload = {'description': description, 'shop_order_id': invoice_id,
                'currency': currency, 'payway': 'payeer_rub',
@@ -70,6 +67,7 @@ def invoice_method(form):
     if r.status_code == 200:
         response_json = r.json()
     else:
+        current_app.logger.info('not 200 response', 'invoice_method')
         return redirect('/')
 
     if response_json.get('result', False):
@@ -79,4 +77,5 @@ def invoice_method(form):
         return render_template('invoice.html', input_fields=payload,
                                method=method, action=action)
     else:
+        current_app.logger.info('result False or invalid json', 'invoice_method')
         return redirect('/')
