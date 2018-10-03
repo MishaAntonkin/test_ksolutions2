@@ -1,7 +1,7 @@
 from flask import current_app, render_template, redirect
 import requests
 
-from .utils import clear_data_to_payload, InvoiceCounter, create_sign
+from .utils import clear_data_to_payload, create_sign
 from .utils.db_utils import save_invoice
 
 
